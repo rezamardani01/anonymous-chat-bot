@@ -11,7 +11,6 @@ TOKEN = "8507805503:AAHLvBbslolA1WVL45Mw_c_VWLGGkWnInoo"
 
 dp = Dispatcher()
 
-dp.message.middleware(UserMiddleware())
 dp.include_router(start_route)
 dp.include_router(chat_route)
 
