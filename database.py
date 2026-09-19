@@ -6,24 +6,44 @@ class Database:
         self.connection = sqlite3.connect(db_name)
         self.cursor = self.connection.cursor()
         self.create_users_table()
+        self.create_chat_requests_table()
 
     def create_users_table(self):
         self.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id TEXT NULL UNIQUE,
-                name TEXT NULL,
-                step TEXT NULL,
-                partner_id TEXT NULL
-            )
-        """)
-        self.connection.commit()
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT UNIQUE,
+            name TEXT NOT NULL,
+            age INTEGER NOT NULL,
+            gender TEXT NOT NULL,
+            bio TEXT,
+            profile_like INTEGER DEFAULT 0,
+            step TEXT
+        )
+    """)
 
-    def add_user(self, user_id, name, step=None, partner_id=None):
+    self.connection.commit()
+
+    def create_chat_requests_table(self):
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS chat_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            gender TEXT NULL,
+            min_age INTEGER NULL,
+            max_age INTEGER NULL,
+            status TEXT DEFAULT 'waiting',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    self.connection.commit()
+
+    def add_user(self, user_id, name, age, gender, step=None, partner_id=None):
         self.cursor.execute(
             """
-            INSERT INTO users (user_id, name, step, partner_id)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO users (user_id, name, age, gender, step, partner_id)
+            VALUES (?, ?, ?, ?, ?, ?)
         """,
             (user_id, name, step, partner_id),
         )
@@ -32,53 +52,21 @@ class Database:
     def get_user(self, user_id):
         self.cursor.execute(
             """
-            SELECT * FROM users WHERE user_id = ?
-        """,
+            SELELCT FROM users WHERE user_id = ?
+            """,
             (user_id,),
         )
+
         return self.cursor.fetchone()
 
-    def setPartner(self, user_id, partner_id):
-        self.cursor.execute(
-            """
-            UPDATE users SET partner_id = ? WHERE user_id = ?
-        """,
-            (partner_id, user_id),
-        )
-        self.connection.commit()
-
-    def setStep(self, user_id, step):
+    def set_step(self, user_id, step):
         self.cursor.execute(
             """
             UPDATE users SET step = ? WHERE user_id = ?
-        """,
+            """,
             (step, user_id),
         )
         self.connection.commit()
 
-    def getStep(self, user_id):
-        self.cursor.execute(
-            """
-        SELECT step FROM users WHERE user_id = ?
-        """,
-            (user_id,),
-        )
 
-        result = self.cursor.fetchone()
-        return result[0]
-
-    def getUserWaiting(self, user_id):
-       self.cursor.execute(
-        """
-        SELECT user_id FROM users
-        WHERE step = 'waiting'
-        AND user_id != ?
-        ORDER BY RANDOM()
-        LIMIT 1
-        """,
-        (user_id,),
-    )
-       return self.cursor.fetchone()
-
-        
 db = Database("anonymousChat.db")
