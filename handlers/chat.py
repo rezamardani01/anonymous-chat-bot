@@ -8,7 +8,7 @@ from filters.step import StepFilter
 
 route = Router()
 
-@route.message(F.text == "🔎 پیدا کردن پارتنر")
+@route.message(F.text == "✍🏻 به یک ناشناس وصلم کن!")
 async def find_partner(message: Message):
     user_id = message.from_user.id
     db.setStep(user_id, "waiting")
